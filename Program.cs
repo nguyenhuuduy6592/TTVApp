@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net;
+using System.Runtime.Serialization.Formatters;
 
 namespace dotnet_core
 {
@@ -19,23 +21,66 @@ namespace dotnet_core
     {
         static void Main(string[] args)
         {
-            // int step = int.Parse(args[0]);
             // var fileName = args[1];
-            int step = 1;
             string fileName = "Chua_te";
-            switch (step) {
-                case 1:
-                    GetChapterListContent(fileName);
-                    break;
-                case 2:
-                    ProcessFile(fileName);
-                    break;
+            
+            // Read previous work
+            var story = ReadPreviousWork(fileName);
+            // Parse story info if needed            
+            if (story == null)
+            {
+                story = ParseStoryInfo(fileName);
+                if (story == null){
+                    Console.WriteLine("Input file not found!");
+                    return;
+                }
+            }
+            // Get chapters' content if needed
+            var complete = GetChapterListContent(story, fileName);
+            // Save output if completed
+            if (complete){
+                SaveHtml(story, fileName);
+                Console.WriteLine("Completed!");
+            }
+            // Save current work if not completed
+            else 
+            {
+                SaveCurrentWork(story, fileName);
+                Console.WriteLine("Incompleted. Saved Current Work!");
             }
         }
 
-        public static void GetChapterListContent(string fileName)
+        public static StoryModel ReadPreviousWork(string fileName){
+            StoryModel story = null;
+            var filePath = @"C:\Truyen2\" + fileName + ".bin";
+            if (File.Exists(filePath)){
+                using (StreamReader file = File.OpenText(filePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    story = (StoryModel)serializer.Deserialize(file, typeof(StoryModel));
+                }
+            }
+            return story;
+        }
+
+        public static bool SaveCurrentWork(StoryModel story, string fileName)
         {
-            var story = new StoryModel();
+            try {
+                var filePath = @"C:\Truyen2\" + fileName + ".bin";
+                using (StreamWriter file = File.CreateText(filePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, story);
+                }
+                return true;
+            }
+            catch {
+                return false;
+            }
+        }
+
+        public static StoryModel ParseStoryInfo(string fileName)
+        {
             using (StreamReader file = File.OpenText(@"C:\Truyen2\" + fileName + ".txt"))
             {
                 var content = file.ReadToEnd();
@@ -45,6 +90,7 @@ namespace dotnet_core
                 Encoding enc = new UTF8Encoding(true, true);
                 JsonSerializer serializer = new JsonSerializer();
                 byte[] bytes;
+                var story = new StoryModel();
                 foreach (Match match in regex.Matches(content))
                 {
                     var value = match.Value;
@@ -75,14 +121,39 @@ namespace dotnet_core
                     }
                     index++;
                 }
+                return story;
             }
-            
+        }
+
+        public static bool GetChapterListContent(StoryModel story, string fileName)
+        {
+            var chapterCount = 0;
             var storyController = new StoryController(story.Id);
-            foreach (var chapter in story.Chapters) {
-                chapter.Content = storyController.GetChapterContent(chapter.Id).Result;
+            if (storyController.HasToken){
+                foreach (var chapter in story.Chapters) {
+                    if (string.IsNullOrEmpty(chapter.Content))
+                    {
+                        chapterCount++;
+                        var content = storyController.GetChapterContent(chapter.Id).Result;
+                        if (!string.IsNullOrEmpty(content)){
+                            chapter.Content = content;
+                            chapterCount++;
+                        }
+                    }
+                    chapterCount++;
+                }
+                return chapterCount == story.Chapters.Count;
             }
+            else
+            {
+                Console.WriteLine("No Token!");
+                return false;
+            }
+        }
+
+        public static void SaveHtml(StoryModel story, string fileName)
+        {
             // Output data
-            if (story.Id > 0) {
                 var outputFile = @"C:\Truyen2\" + fileName + ".html";
                 var output = "<html>";
                 // header
@@ -124,7 +195,6 @@ namespace dotnet_core
                 output += "</body>";
                 output += "</html>";
                 File.WriteAllLines(outputFile, output.Split('\n'));
-            }
         }
 
         public static void ProcessFile(string fileName)

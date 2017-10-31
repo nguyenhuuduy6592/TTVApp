@@ -9,6 +9,7 @@
       "dotnet core/1.0.0": {
         "dependencies": {
           "Newtonsoft.Json": "10.0.3",
+          "System.Runtime.Serialization.Formatters": "4.3.0",
           "System.Runtime.Serialization.Json": "4.3.0",
           "System.Text.Encodings.Web": "4.4.0"
         },

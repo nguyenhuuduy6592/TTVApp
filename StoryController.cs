@@ -18,6 +18,7 @@ namespace dotnet_core
         private const int UserId = 62790;
         private string Token { get; set; }
         private int StoryId { get; set; }
+        public bool HasToken { get; set; }
 
         public StoryController()
         {
@@ -34,6 +35,9 @@ namespace dotnet_core
             StoryId = storyId;
             if (string.IsNullOrEmpty(Token)){
                 GetToken().Wait();
+            }
+            if (string.IsNullOrEmpty(Token)){
+                HasToken = false;
             }
         }
         
@@ -124,8 +128,9 @@ namespace dotnet_core
             {
                 var responseContent = await httpResponse.Content.ReadAsStringAsync();
                 TokenModel data = Newtonsoft.Json.JsonConvert.DeserializeObject<TokenModel>(responseContent);
-                Console.Write(data.IMEI.remember_token);
-                Token = data.IMEI.remember_token;
+                if (data != null) {
+                    Token = data.IMEI.remember_token;
+                }
             }
         }
 

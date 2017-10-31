@@ -7690,6 +7690,7 @@
     ".NETCoreApp,Version=v1.1": [
       "Microsoft.NETCore.App >= 1.1.2",
       "Newtonsoft.Json >= 10.0.3",
+      "System.Runtime.Serialization.Formatters >= 4.3.0",
       "System.Runtime.Serialization.Json >= 4.3.0",
       "System.Text.Encodings.Web >= 4.4.0"
     ]
@@ -7735,6 +7736,10 @@
           "System.Text.Encodings.Web": {
             "target": "Package",
             "version": "4.4.0"
+          },
+          "System.Runtime.Serialization.Formatters": {
+            "target": "Package",
+            "version": "4.3.0"
           }
         }
       }
