@@ -24,10 +24,12 @@ namespace dotnet_core
             var fileName = args[0];
 
             // Read previous work
+            Console.WriteLine("Read previous work!");
             var story = ReadPreviousWork(fileName);
             // Parse story info if needed            
             if (story == null)
             {
+                Console.WriteLine("No previous work. Parse story info!");
                 story = ParseStoryInfo(fileName);
                 if (story == null){
                     Console.WriteLine("Input file not found!");
@@ -35,15 +37,17 @@ namespace dotnet_core
                 }
             }
             // Get chapters' content if needed
+            Console.WriteLine("Get chapters' content!");
             var complete = GetChapterListContent(story, fileName);
             // Save output if completed
             if (complete){
+                Console.WriteLine("Save output!");
                 SaveHtml(story, fileName);
                 Console.WriteLine("Completed!");
             }
             // Save current work for future
+            Console.WriteLine("Saved Current Work!");
             SaveCurrentWork(story, fileName);
-            Console.WriteLine("Incompleted. Saved Current Work!");
         }
 
         public static StoryModel ReadPreviousWork(string fileName){
