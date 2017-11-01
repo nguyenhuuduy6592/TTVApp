@@ -21,9 +21,8 @@ namespace dotnet_core
     {
         static void Main(string[] args)
         {
-            // var fileName = args[1];
-            string fileName = "Chua_te";
-            
+            var fileName = args[0];
+                        
             // Read previous work
             var story = ReadPreviousWork(fileName);
             // Parse story info if needed            

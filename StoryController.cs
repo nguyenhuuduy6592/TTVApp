@@ -36,9 +36,10 @@ namespace dotnet_core
             if (string.IsNullOrEmpty(Token)){
                 GetToken().Wait();
             }
-            if (string.IsNullOrEmpty(Token)){
+            if (string.IsNullOrEmpty(Token))
                 HasToken = false;
-            }
+            else
+                HasToken = true;
         }
         
         public async Task<string> GetChapterContent(int chapterId)
@@ -72,7 +73,7 @@ namespace dotnet_core
                 {
                     var responseContent = await httpResponse.Content.ReadAsStringAsync();
                     var data = JsonConvert.DeserializeObject<ChapterResponse>(responseContent);
-                    if (data.Message == "success")
+                    if (data.Message == "succes")
                         chapter.Content = data.Content_Chapter[0].Content;
                 }
                 return chapter.Content;
