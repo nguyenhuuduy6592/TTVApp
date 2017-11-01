@@ -22,7 +22,7 @@ namespace dotnet_core
         static void Main(string[] args)
         {
             var fileName = args[0];
-                        
+
             // Read previous work
             var story = ReadPreviousWork(fileName);
             // Parse story info if needed            
@@ -41,12 +41,9 @@ namespace dotnet_core
                 SaveHtml(story, fileName);
                 Console.WriteLine("Completed!");
             }
-            // Save current work if not completed
-            else 
-            {
-                SaveCurrentWork(story, fileName);
-                Console.WriteLine("Incompleted. Saved Current Work!");
-            }
+            // Save current work for future
+            SaveCurrentWork(story, fileName);
+            Console.WriteLine("Incompleted. Saved Current Work!");
         }
 
         public static StoryModel ReadPreviousWork(string fileName){
