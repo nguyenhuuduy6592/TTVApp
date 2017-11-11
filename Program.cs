@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net;
 using System.Runtime.Serialization.Formatters;
+using System.Threading;
 
 namespace dotnet_core
 {
@@ -133,11 +134,12 @@ namespace dotnet_core
                 foreach (var chapter in story.Chapters) {
                     if (string.IsNullOrEmpty(chapter.Content))
                     {
-                        chapterCount++;
                         var content = storyController.GetChapterContent(chapter.Id).Result;
                         if (!string.IsNullOrEmpty(content)){
                             chapter.Content = content;
                             chapterCount++;
+                            Thread.Sleep(150);
+                            continue;
                         }
                     }
                     chapterCount++;
