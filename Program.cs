@@ -22,7 +22,6 @@ namespace dotnet_core
         static void Main(string[] args)
         {
             var fileName = args[0];
-
             // Read previous work
             Console.WriteLine("Read previous work!");
             var story = ReadPreviousWork(fileName);
