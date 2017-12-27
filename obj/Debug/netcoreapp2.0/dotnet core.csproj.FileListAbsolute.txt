@@ -1,0 +1,10 @@
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/bin/Debug/netcoreapp2.0/dotnet core.deps.json
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/bin/Debug/netcoreapp2.0/dotnet core.runtimeconfig.json
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/bin/Debug/netcoreapp2.0/dotnet core.runtimeconfig.dev.json
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/bin/Debug/netcoreapp2.0/dotnet core.dll
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/bin/Debug/netcoreapp2.0/dotnet core.pdb
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.csproj.CoreCompileInputs.cache
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.AssemblyInfoInputs.cache
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.AssemblyInfo.cs
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.dll
+/Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.pdb
