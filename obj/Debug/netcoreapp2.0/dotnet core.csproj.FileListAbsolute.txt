@@ -8,3 +8,13 @@
 /Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.AssemblyInfo.cs
 /Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.dll
 /Users/nguyenthuthao/Documents/Duy/Console/TTVApp/obj/Debug/netcoreapp2.0/dotnet core.pdb
+d:\Projects\dotnet core\bin\Debug\netcoreapp2.0\dotnet core.deps.json
+d:\Projects\dotnet core\bin\Debug\netcoreapp2.0\dotnet core.runtimeconfig.json
+d:\Projects\dotnet core\bin\Debug\netcoreapp2.0\dotnet core.runtimeconfig.dev.json
+d:\Projects\dotnet core\bin\Debug\netcoreapp2.0\dotnet core.dll
+d:\Projects\dotnet core\bin\Debug\netcoreapp2.0\dotnet core.pdb
+d:\Projects\dotnet core\obj\Debug\netcoreapp2.0\dotnet core.csproj.CoreCompileInputs.cache
+d:\Projects\dotnet core\obj\Debug\netcoreapp2.0\dotnet core.AssemblyInfoInputs.cache
+d:\Projects\dotnet core\obj\Debug\netcoreapp2.0\dotnet core.AssemblyInfo.cs
+d:\Projects\dotnet core\obj\Debug\netcoreapp2.0\dotnet core.dll
+d:\Projects\dotnet core\obj\Debug\netcoreapp2.0\dotnet core.pdb
