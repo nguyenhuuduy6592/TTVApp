@@ -36,7 +36,7 @@ namespace dotnet_core
         }
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Image { get; set; }
+        public string Image { get; set; }
         public string Introduce { get; set; }
         public int Finish { get; set; }
         public int ForumThreadId { get; set; }

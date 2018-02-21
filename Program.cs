@@ -22,7 +22,8 @@ namespace dotnet_core
     {
         static void Main(string[] args)
         {
-            var fileName = args[0];
+            //var fileName = args[0];
+            var fileName = "Nhat_niem_vinh_hang_2";
 
             // Read previous work
             Console.WriteLine("Read previous work!");
@@ -185,8 +186,23 @@ namespace dotnet_core
                 output += "<p class=\"green center\">Trạng thái: " + (story.Finish == 0 ? "Đang ra" : "Hoàn thành") + "</p>";
                 output += "<p class=\"info center\">Giới thiệu<p><p class=\"introduce center\">" + story.Introduce.Replace("\n", "<br />") + "</p>";
                 output += "<p class=\"info center\">Danh sách chương</p>";
-                foreach (var chapter in story.Chapters){
-                    output += "<p><a href=\"#" + chapter.Id + "\">" + chapter.ChapterNumber + ": " + chapter.ChapterName + "</a></p>";
+                var step = 100;
+                for (var index = 1; index <= story.Chapters.Count; index = index + step) {
+                    var chapter = story.Chapters[index - 1];
+                    if (chapter != null) {
+                        var nextIndex = index + step;
+                        if (nextIndex > story.Chapters.Count) nextIndex = story.Chapters.Count;
+                        var nextChapter = story.Chapters[nextIndex - 1];
+                        if (nextChapter != null) {
+                            output += "<p><a href=\"#" + index + "\">" + chapter.ChapterNumber + " - " + nextChapter.ChapterNumber + "</a></p>";
+                        }
+                    }
+                }
+                for (var index = 1; index <= story.Chapters.Count; index++) {
+                    var chapter = story.Chapters[index - 1];
+                    if (chapter != null) {
+                        output += "<p id=\"" + index + "\"><a href=\"#" + chapter.Id + "\">" + chapter.ChapterNumber + ": " + chapter.ChapterName + "</a></p>";
+                    }
                 }
                 foreach (var chapter in story.Chapters){
                     output += "<br /><br /><h2 id=\"" + chapter.Id + "\">" + story.Name + " - " + chapter.ChapterNumber + ": " + chapter.ChapterName + "</h2><br /><br />";
