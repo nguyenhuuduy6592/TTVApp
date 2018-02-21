@@ -157,62 +157,62 @@ namespace dotnet_core
         public static void SaveHtml(StoryModel story, string fileName)
         {
             // Output data
-                var outputFile = @"C:\Truyen2\" + fileName + ".html";
-                var output = "<html>";
-                // header
-                output += @"<head>" + 
-                    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />" +
-                    "<title></title>" + 
-                    "<style>" + 
-                    "    *{margin:0!important;line-height:1.3em}" + 
-                    "    body{margin:8px!important;}" + 
-                    "    a{font-weight:700;text-decoration:none}" + 
-                    "    h2{color:red;font-weight:700;text-align:center;}" +
-                    "    .center{text-align:center;}" +
-                    "    .info{font-weight:700;}" + 
-                    "    .red{color:red;}" + 
-                    "    .purple{color:purple;}" + 
-                    "    .introduce{font-weight:100}" +
-                    "    .blue{color:blue}" + 
-                    "    .green{color:green}" + 
-                    "    </style>" + 
-                    "</head>";
-                output += "<body>";
-                output += "<h2 class=\"blue center\">Truyện: " + story.Name + "</h2>";
-                output += "<p class=\"info center\">Thông tin ebook</p>";
-                output += "<p class=\"red center\">Người tạo: Bestfriend</p>";
-                output += "<p class=\"purple center\">Nguồn: Tàng thư viện</p>";
-                output += "<p class=\"blue center\">Tác giả: " + story.Author.Name + "</p>";
-                output += "<p class=\"green center\">Trạng thái: " + (story.Finish == 0 ? "Đang ra" : "Hoàn thành") + "</p>";
-                output += "<p class=\"info center\">Giới thiệu<p><p class=\"introduce center\">" + story.Introduce.Replace("\n", "<br />") + "</p>";
-                output += "<p class=\"info center\">Danh sách chương</p>";
-                var step = 100;
-                for (var index = 1; index <= story.Chapters.Count; index = index + step) {
-                    var chapter = story.Chapters[index - 1];
-                    if (chapter != null) {
-                        var nextIndex = index + step;
-                        if (nextIndex > story.Chapters.Count) nextIndex = story.Chapters.Count;
-                        var nextChapter = story.Chapters[nextIndex - 1];
-                        if (nextChapter != null) {
-                            output += "<p><a href=\"#" + index + "\">" + chapter.ChapterNumber + " - " + nextChapter.ChapterNumber + "</a></p>";
-                        }
+            var outputFile = @"C:\Truyen2\" + fileName + ".html";
+            var output = "<html>";
+            // header
+            output += @"<head>" + 
+                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />" +
+                "<title></title>" + 
+                "<style>" + 
+                "    *{margin:0!important;line-height:1.3em}" + 
+                "    body{margin:8px!important;}" + 
+                "    a{font-weight:700;text-decoration:none}" + 
+                "    h2{color:red;font-weight:700;text-align:center;}" +
+                "    .center{text-align:center;}" +
+                "    .info{font-weight:700;}" + 
+                "    .red{color:red;}" + 
+                "    .purple{color:purple;}" + 
+                "    .introduce{font-weight:100}" +
+                "    .blue{color:blue}" + 
+                "    .green{color:green}" + 
+                "    </style>" + 
+                "</head>";
+            output += "<body>";
+            output += "<h2 class=\"blue center\">Truyện: " + story.Name + "</h2>";
+            output += "<p class=\"info center\">Thông tin ebook</p>";
+            output += "<p class=\"red center\">Người tạo: Bestfriend</p>";
+            output += "<p class=\"purple center\">Nguồn: Tàng thư viện</p>";
+            output += "<p class=\"blue center\">Tác giả: " + story.Author.Name + "</p>";
+            output += "<p class=\"green center\">Trạng thái: " + (story.Finish == 0 ? "Đang ra" : "Hoàn thành") + "</p>";
+            output += "<p class=\"info center\">Giới thiệu<p><p class=\"introduce center\">" + story.Introduce.Replace("\n", "<br />") + "</p>";
+            output += "<p class=\"info center\">Danh sách chương</p>";
+            var step = 100;
+            for (var index = 1; index <= story.Chapters.Count; index = index + step) {
+                var chapter = story.Chapters[index - 1];
+                if (chapter != null) {
+                    var nextIndex = index + step;
+                    if (nextIndex > story.Chapters.Count) nextIndex = story.Chapters.Count;
+                    var nextChapter = story.Chapters[nextIndex - 1];
+                    if (nextChapter != null) {
+                        output += "<p><a href=\"#" + index + "\">" + chapter.ChapterNumber + " - " + nextChapter.ChapterNumber + "</a></p>";
                     }
                 }
-                for (var index = 1; index <= story.Chapters.Count; index++) {
-                    var chapter = story.Chapters[index - 1];
-                    if (chapter != null) {
-                        output += "<p id=\"" + index + "\"><a href=\"#" + chapter.Id + "\">" + chapter.ChapterNumber + ": " + chapter.ChapterName + "</a></p>";
-                    }
+            }
+            for (var index = 1; index <= story.Chapters.Count; index++) {
+                var chapter = story.Chapters[index - 1];
+                if (chapter != null) {
+                    output += "<p id=\"" + index + "\"><a href=\"#" + chapter.Id + "\">" + chapter.ChapterNumber + ": " + chapter.ChapterName + "</a></p>";
                 }
-                foreach (var chapter in story.Chapters){
-                    output += "<br /><br /><h2 id=\"" + chapter.Id + "\">" + story.Name + " - " + chapter.ChapterNumber + ": " + chapter.ChapterName + "</h2><br /><br />";
-                    if (chapter.Content != null) {
-                        output += "<p>" + chapter.Content.Replace("\n", "<br />") + "</p>";
-                    }
+            }
+            foreach (var chapter in story.Chapters){
+                output += "<br /><br /><h2 id=\"" + chapter.Id + "\">" + story.Name + " - " + chapter.ChapterNumber + ": " + chapter.ChapterName + "</h2><br /><br />";
+                if (chapter.Content != null) {
+                    output += "<p>" + chapter.Content.Replace("\n", "<br />") + "</p>";
                 }
-                output += "</body>";
-                output += "</html>";
-                File.WriteAllLines(outputFile, output.Split('\n'));
+            }
+            output += "</body>";
+            output += "</html>";
+            File.WriteAllLines(outputFile, output.Split('\n'));
         }
 
         public static void ProcessFile(string fileName)
