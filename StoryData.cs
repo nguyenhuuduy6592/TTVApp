@@ -20,7 +20,7 @@ namespace dotnet_core
         public int Finish { get; set; }
         public int Id { get; set; }
         public int Id_Thread { get; set; }
-        public int Image { get; set; }
+        public string Image { get; set; }
         public string Introduce { get; set; }
         public string Name { get; set; }
     }
