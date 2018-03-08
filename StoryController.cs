@@ -84,7 +84,7 @@ namespace dotnet_core
             }
         }
 
-        public async Task GetChapterList(){
+        public void GetChapterList(){
             var client = new HttpClient();
             client.BaseAddress = new Uri(BaseUrl);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -96,16 +96,16 @@ namespace dotnet_core
             };
 
             // Serialize our concrete class into a JSON String
-            var querydata = await Task.Run(() => JsonConvert.SerializeObject(postModel));
+            var querydata = JsonConvert.SerializeObject(postModel);
             var encodeQuery = new StringContent(querydata, Encoding.UTF8, "application/json");
 
             encodeQuery.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var httpResponse = await client.PostAsync(new Uri(TTVBaseUrl + "get_list_chapter"), encodeQuery);
+            var httpResponse = client.PostAsync(new Uri(TTVBaseUrl + "get_list_chapter"), encodeQuery).Result;
             
             if (httpResponse.Content != null)
             {
-                var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                var responseContent = httpResponse.Content.ReadAsStringAsync().Result;
                 ChapterListResponse data = JsonConvert.DeserializeObject<ChapterListResponse>(responseContent);
                 Console.Write(data);
                 //Token = data.IMEI.remember_token;

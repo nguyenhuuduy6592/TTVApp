@@ -21,6 +21,12 @@ namespace dotnet_core
     {
         static void Main(string[] args)
         {
+            var storyController = new StoryController(1111);
+            storyController.GetChapterList();
+            // DownloadStory(args);
+        }
+
+        public static void DownloadStory(string[] args){
             var fileName = args[0];
             // Read previous work
             Console.WriteLine("Read previous work!");
