@@ -16,7 +16,7 @@ using System.Net;
 using System.Runtime.Serialization.Formatters;
 using System.Threading;
 
-namespace dotnet_core
+namespace TTV
 {
     class Program
     {

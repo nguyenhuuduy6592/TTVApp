@@ -8,7 +8,7 @@ using System;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 
-namespace dotnet_core
+namespace TTV
 {
     public class StoryController {
         private const string BaseUrl = "https://www.nae.vn/";

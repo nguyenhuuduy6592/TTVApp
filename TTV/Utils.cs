@@ -1,6 +1,6 @@
 using System;
 
-namespace dotnet_core
+namespace TTV
 {
     public class Utils
     {

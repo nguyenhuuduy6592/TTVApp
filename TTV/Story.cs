@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace dotnet_core
+namespace TTV
 {
     public class TokenModel {
         public IMEI IMEI { get; set; }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace dotnet_core
+namespace TTV
 {
     public class StoryRequest {
         public int Id_Story { get; set; }
