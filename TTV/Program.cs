@@ -22,29 +22,33 @@ namespace TTV
     {
         static void Main(string[] args)
         {
-            var storyController = new StoryController("f010b5c4df76c653caa2785343d0495a09b7dbc786b7facee27b1073aafc1a9f", 19954);
-            storyController.GetChapterList();
-            // DownloadStory(args);
+            //    var storyController = new StoryController("zBRs4qC7lmpk4L4lu8zfhidwzupNwnFcPkFWqmK8LQk5ZwnYvl", 26334);
+            //    storyController.GetStoryContent();
+            DownloadStory(args);
+            //GetStoryInfo(26334, "zBRs4qC7lmpk4L4lu8zfhidwzupNwnFcPkFWqmK8LQk5ZwnYvl");
         }
 
         public static void DownloadStory(string[] args){
             var fileName = args[0];
+            var token = args[1];
+            int.TryParse(args[2], out var id);
             // Read previous work
             Console.WriteLine("Read previous work!");
             var story = ReadPreviousWork(fileName);
             // Parse story info if needed            
             if (story == null)
             {
-                Console.WriteLine("No previous work. Parse story info!");
-                story = ParseStoryInfo(fileName);
+                Console.WriteLine("No previous work. Read story info!");
+                story = GetStoryInfo(id, token);
                 if (story == null){
-                    Console.WriteLine("Input file not found!");
+                    Console.WriteLine($"Story with id {id} not found!");
                     return;
                 }
             }
+            SaveCurrentWork(story, fileName);
             // Get chapters' content if needed
             Console.WriteLine("Get chapters' content!");
-            var complete = GetChapterListContent(story, fileName);
+            var complete = GetChapterListContent(story, fileName, token);
             // Save output if completed
             if (complete){
                 Console.WriteLine("Save output!");
@@ -85,6 +89,64 @@ namespace TTV
             }
         }
 
+        public static StoryModel GetStoryInfo(int storyId, string token)
+        {
+            StoryController storyController;
+            if (string.IsNullOrEmpty(token))
+            {
+                storyController = new StoryController(storyId);
+            }
+            else
+            {
+                storyController = new StoryController(token, storyId);
+            }
+            StoryModel model = null;
+            if (storyController.HasToken)
+            {
+                var data = storyController.GetStoryContent();
+                if (data != null)
+                {
+                    Encoding enc = new UTF8Encoding(true, true);
+                    byte[] bytes;
+                    model = new StoryModel
+                    {
+                        Id = data.Story.Id,
+                        Image = data.Story.Image,
+                        Finish = data.Story.Finish,
+                        ForumThreadId = data.Story.Id_Thread,
+                        Author = new AuthorModel
+                        {
+                            Name = data.Story.Author
+                        }
+                    };
+                    bytes = enc.GetBytes(data.Story.Name);
+                    model.Name = enc.GetString(bytes);
+                    bytes = enc.GetBytes(data.Story.Introduce);
+                    model.Introduce = enc.GetString(bytes);
+
+                    var chapterList = storyController.GetChapterList();
+                    if (chapterList != null)
+                    {
+                        foreach (var item in chapterList.Chapter)
+                        {
+                            model.Chapters.Add(new ChapterModel
+                            {
+                                ChapterName = item.Content_Title_Of_Chapter,
+                                ChapterNumber = item.Name_Id_Chapter,
+                                Id = item.Id,
+                                StoryId = model.Id
+                            });
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("No Token!");
+            }
+            return model;
+        }
+
         public static StoryModel ParseStoryInfo(string fileName)
         {
             using (StreamReader file = File.OpenText(@"C:\Truyen2\" + fileName + ".txt"))
@@ -97,27 +159,33 @@ namespace TTV
                 JsonSerializer serializer = new JsonSerializer();
                 byte[] bytes;
                 var story = new StoryModel();
-                foreach (Match match in regex.Matches(content))
+                var matches = regex.Matches(content);
+                foreach (Match match in matches)
                 {
                     var value = match.Value;
-                    if (index == 1) {
+                    if (index == 1)
+                    {
                         StoryResponse data = JsonConvert.DeserializeObject<StoryResponse>(value);
                         story.Id = data.Story.Id;
                         story.Image = data.Story.Image;
                         story.Finish = data.Story.Finish;
                         story.ForumThreadId = data.Story.Id_Thread;
-                        story.Author = new AuthorModel {
+                        story.Author = new AuthorModel
+                        {
                             Name = data.Story.Author
                         };
-                        bytes= enc.GetBytes(data.Story.Name);
+                        bytes = enc.GetBytes(data.Story.Name);
                         story.Name = enc.GetString(bytes);
-                        bytes= enc.GetBytes(data.Story.Introduce);
+                        bytes = enc.GetBytes(data.Story.Introduce);
                         story.Introduce = enc.GetString(bytes);
                     }
-                    else if (index == 3) {
+                    else if (index == 3)
+                    {
                         ChapterListResponse data = JsonConvert.DeserializeObject<ChapterListResponse>(value);
-                        foreach (var item in data.Chapter){
-                            story.Chapters.Add(new ChapterModel {
+                        foreach (var item in data.Chapter)
+                        {
+                            story.Chapters.Add(new ChapterModel
+                            {
                                 ChapterName = item.Content_Title_Of_Chapter,
                                 ChapterNumber = item.Name_Id_Chapter,
                                 Id = item.Id,
@@ -131,19 +199,30 @@ namespace TTV
             }
         }
 
-        public static bool GetChapterListContent(StoryModel story, string fileName)
+        public static bool GetChapterListContent(StoryModel story, string fileName, string token)
         {
             var chapterCount = 0;
-            var storyController = new StoryController(story.Id);
+            StoryController storyController;
+            if (string.IsNullOrEmpty(token))
+            {
+                storyController = new StoryController(story.Id);
+            }
+            else
+            {
+                storyController = new StoryController(token, story.Id);
+            }
+
             if (storyController.HasToken){
                 foreach (var chapter in story.Chapters) {
                     if (string.IsNullOrEmpty(chapter.Content))
                     {
-                        var content = storyController.GetChapterContent(chapter.Id).Result;
+                        Console.WriteLine(chapter.ChapterNumber);
+                        var content = storyController.GetChapterContent(chapter.Id);
                         if (!string.IsNullOrEmpty(content)){
                             chapter.Content = content;
                             chapterCount++;
-                            Thread.Sleep(150);
+                            SaveCurrentWork(story, fileName);
+                            Thread.Sleep(100);
                             continue;
                         }
                     }
@@ -331,6 +410,12 @@ namespace TTV
                     File.WriteAllLines(outputFile, output.Split('\n'));
                 }
             }
+        }
+
+        static void OnProcessExit(object sender, EventArgs e)
+        {
+            Console.WriteLine("I'm out of here");
+            Console.ReadLine();
         }
     }
 }

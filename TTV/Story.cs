@@ -8,6 +8,10 @@ namespace TTV
     public class IMEI { 
         public string remember_token { get; set; }
     }
+    public class StoryRequestModel
+    {
+        public int id_story { get; set; }
+    }
     public class GetListChapterRequestModel {
         public string get_list_chapter { get; set; }
     }

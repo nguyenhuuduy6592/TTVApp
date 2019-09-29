@@ -2,9 +2,6 @@ using System.Collections.Generic;
 
 namespace TTV
 {
-    public class StoryRequest {
-        public int Id_Story { get; set; }
-    }
     public class StoryResponse {
         public StoryResponse()
         {
