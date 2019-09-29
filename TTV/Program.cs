@@ -75,7 +75,7 @@ namespace TTV
 
         public static StoryModel ReadPreviousWork(string fileName){
             StoryModel story = null;
-            var filePath = @"C:\Truyen2\" + fileName + ".bin";
+            var filePath = fileName + ".bin";
             if (File.Exists(filePath)){
                 using (StreamReader file = File.OpenText(filePath))
                 {
@@ -89,7 +89,7 @@ namespace TTV
         public static bool SaveCurrentWork(StoryModel story, string fileName)
         {
             try {
-                var filePath = @"C:\Truyen2\" + fileName + ".bin";
+                var filePath = fileName + ".bin";
                 using (StreamWriter file = File.CreateText(filePath))
                 {
                     JsonSerializer serializer = new JsonSerializer();
@@ -153,7 +153,7 @@ namespace TTV
 
         public static StoryModel ParseStoryInfo(string fileName)
         {
-            using (StreamReader file = File.OpenText(@"C:\Truyen2\" + fileName + ".txt"))
+            using (StreamReader file = File.OpenText(fileName + ".txt"))
             {
                 var content = file.ReadToEnd();
                 Regex regex = new Regex(@"\{(.|\s)*?\}\s");
@@ -234,7 +234,7 @@ namespace TTV
         public static void SaveHtml(StoryModel story, string fileName)
         {
             // Output data
-            var outputFile = @"C:\Truyen2\" + fileName + ".html";
+            var outputFile = fileName + ".html";
             var output = "<html>";
             // header
             output += @"<head>" + 
@@ -294,7 +294,7 @@ namespace TTV
 
         public static void ProcessFile(string fileName)
         {
-            using (StreamReader file = File.OpenText(@"C:\Truyen2\" + fileName + ".txt"))
+            using (StreamReader file = File.OpenText(fileName + ".txt"))
             {
                 var content = file.ReadToEnd();
                 Regex regex = new Regex(@"\{(.|\s)*?\}\s");
@@ -361,7 +361,7 @@ namespace TTV
                 }
                 // Output data
                 if (story.Id > 0) {
-                    var outputFile = @"C:\Truyen2\" + fileName + ".html";
+                    var outputFile = fileName + ".html";
                     var output = "<html>";
                     // header
                     output += @"<head>" + 
