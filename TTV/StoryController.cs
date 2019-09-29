@@ -44,12 +44,16 @@ namespace TTV
         
         public async Task<string> GetChapterContent(int chapterId)
         {
-            ChapterModel chapter = new ChapterModel();
-            chapter.Id = chapterId;
+            ChapterModel chapter = new ChapterModel
+            {
+                Id = chapterId
+            };
             try 
             {
-                var client = new HttpClient();
-                client.BaseAddress = new Uri(BaseUrl);
+                var client = new HttpClient
+                {
+                    BaseAddress = new Uri(BaseUrl)
+                };
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
                 client.DefaultRequestHeaders.Add("token",Token);
@@ -85,8 +89,10 @@ namespace TTV
         }
 
         public void GetChapterList(){
-            var client = new HttpClient();
-            client.BaseAddress = new Uri(BaseUrl);
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri(BaseUrl)
+            };
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
             
@@ -114,13 +120,15 @@ namespace TTV
 
         public async Task GetToken()
         {
-            var client = new HttpClient();
-            client.BaseAddress = new Uri(BaseUrl);
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri(BaseUrl)
+            };
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
             
             var querydata = "get_token={\"imei\":\"" + IMEI + "\",\"token_adr\":\"null\",\"token_ios\":\"null\"}";
-            var encodeQuery = new StringContent(System.Uri.EscapeUriString(querydata), Encoding.UTF8, "application/json");
+            var encodeQuery = new StringContent(Uri.EscapeUriString(querydata), Encoding.UTF8, "application/json");
             encodeQuery.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
             var httpResponse = await client.PostAsync(new Uri(TTVBaseUrl + "get_token"), encodeQuery);
@@ -128,7 +136,7 @@ namespace TTV
             if (httpResponse.Content != null)
             {
                 var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                TokenModel data = Newtonsoft.Json.JsonConvert.DeserializeObject<TokenModel>(responseContent);
+                TokenModel data = JsonConvert.DeserializeObject<TokenModel>(responseContent);
                 if (data != null) {
                     Token = data.IMEI.remember_token;
                 }
@@ -137,15 +145,15 @@ namespace TTV
 
         public String CalculateHash_GetChapterList(){
             var input = Token + StoryId + "0all" + "174587236491eyoruwoiernzwueyquhszsadhajsdha8";
-            return sha256Hash(input);
+            return Sha256Hash(input);
         }
 
         public String CalculateHash_GetChapter(int chapterId){
             var input = Token + chapterId + StoryId + UserId + "174587236491eyoruwoiernzwueyquhszsadhajsdha8";
-            return sha256Hash(input);
+            return Sha256Hash(input);
         }
 
-        public string sha256Hash(string data)
+        public string Sha256Hash(string data)
         {
             // SHA256 is disposable by inheritance.  
             using (var sha256 = SHA256.Create())
