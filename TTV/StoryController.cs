@@ -17,17 +17,14 @@ namespace TTV
         private const string TTVBaseUrl = BaseUrl + "ttv/ttv/public/";
         private const string IMEI = "CCA4E8EB-E71D-41C5-BACF-4D60488903C0";
         private const string UserAgent = "TTV/2.3 (iPhone; iOS 13.1; Scale/2.00)";
-        private const int UserId = 62790;
+        private int UserId { get; set; }
         private string Token { get; set; }
         private int StoryId { get; set; }
         public bool HasToken { get; set; }
 
-        public StoryController()
+        public StoryController(int userId, string token, int storyId)
         {
-        }
-
-        public StoryController(string token, int storyId)
-        {
+            UserId = userId;
             Token = token;
             StoryId = storyId;
             HasToken = true;

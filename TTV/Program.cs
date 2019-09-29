@@ -22,35 +22,48 @@ namespace TTV
     {
         static void Main(string[] args)
         {
-            //    var storyController = new StoryController("zBRs4qC7lmpk4L4lu8zfhidwzupNwnFcPkFWqmK8LQk5ZwnYvl", 26334);
-            //    storyController.GetStoryContent();
-            DownloadStory(args);
-            //GetStoryInfo(26334, "zBRs4qC7lmpk4L4lu8zfhidwzupNwnFcPkFWqmK8LQk5ZwnYvl");
-        }
-
-        public static void DownloadStory(string[] args){
-            var fileName = args[0];
+            int.TryParse(args[0], out var userId);
             var token = args[1];
-            int.TryParse(args[2], out var id);
-            // Read previous work
-            Console.WriteLine("Read previous work!");
-            var story = ReadPreviousWork(fileName);
-            // Parse story info if needed            
-            if (story == null)
+            int.TryParse(args[2], out var storyId);
+            var fileName = args[3];
+
+            var storyController = new StoryController(userId, token, storyId);
+            StoryModel story;
+            if (!string.IsNullOrEmpty(fileName) && fileName != "no")
             {
-                Console.WriteLine("No previous work. Read story info!");
-                story = GetStoryInfo(id, token);
-                if (story == null){
-                    Console.WriteLine($"Story with id {id} not found!");
-                    return;
+                // Read previous work
+                Console.WriteLine("Read previous work!");
+                story = ReadPreviousWork(fileName);
+                // Parse story info if needed            
+                if (story == null)
+                {
+                    Console.WriteLine("No previous work. Read story info!");
+                    story = GetStoryInfo(storyController);
+                    if (story == null)
+                    {
+                        Console.WriteLine($"Story with id {storyId} not found!");
+                        return;
+                    }
                 }
             }
+            else
+            {
+                story = GetStoryInfo(storyController);
+                if (story == null)
+                {
+                    Console.WriteLine($"Story with id {storyId} not found!");
+                    return;
+                }
+                fileName = story.Name;
+            }
+
             SaveCurrentWork(story, fileName);
             // Get chapters' content if needed
             Console.WriteLine("Get chapters' content!");
-            var complete = GetChapterListContent(story, fileName, token);
+            var complete = GetChapterListContent(story, fileName, storyController);
             // Save output if completed
-            if (complete){
+            if (complete)
+            {
                 Console.WriteLine("Save output!");
                 SaveHtml(story, fileName);
                 Console.WriteLine("Completed!");
@@ -89,17 +102,8 @@ namespace TTV
             }
         }
 
-        public static StoryModel GetStoryInfo(int storyId, string token)
+        public static StoryModel GetStoryInfo(StoryController storyController)
         {
-            StoryController storyController;
-            if (string.IsNullOrEmpty(token))
-            {
-                storyController = new StoryController(storyId);
-            }
-            else
-            {
-                storyController = new StoryController(token, storyId);
-            }
             StoryModel model = null;
             if (storyController.HasToken)
             {
@@ -199,19 +203,9 @@ namespace TTV
             }
         }
 
-        public static bool GetChapterListContent(StoryModel story, string fileName, string token)
+        public static bool GetChapterListContent(StoryModel story, string fileName, StoryController storyController)
         {
             var chapterCount = 0;
-            StoryController storyController;
-            if (string.IsNullOrEmpty(token))
-            {
-                storyController = new StoryController(story.Id);
-            }
-            else
-            {
-                storyController = new StoryController(token, story.Id);
-            }
-
             if (storyController.HasToken){
                 foreach (var chapter in story.Chapters) {
                     if (string.IsNullOrEmpty(chapter.Content))
