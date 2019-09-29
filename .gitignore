@@ -1,4 +1,7 @@
-bin/Debug/netcoreapp2.0/dotnet core.dll
-bin/Debug/netcoreapp2.0/dotnet core.pdb
-obj/Debug/netcoreapp2.0/dotnet core.dll
-obj/Debug/netcoreapp2.0/dotnet core.pdb
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+**/.vs
+**/bin
+**/obj

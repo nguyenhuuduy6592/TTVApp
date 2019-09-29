@@ -22,7 +22,7 @@ namespace dotnet_core
     {
         static void Main(string[] args)
         {
-            var storyController = new StoryController(1111);
+            var storyController = new StoryController(19954);
             storyController.GetChapterList();
             // DownloadStory(args);
         }
