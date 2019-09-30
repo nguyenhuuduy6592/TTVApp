@@ -1,20 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using System.Text.Encodings.Web;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
-using System.Security;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net;
-using System.Runtime.Serialization.Formatters;
-using System.Threading;
+using System.Diagnostics;
 
 namespace TTV
 {
@@ -22,6 +12,8 @@ namespace TTV
     {
         static void Main(string[] args)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             int.TryParse(args[0], out var userId);
             var token = args[1];
             int.TryParse(args[2], out var storyId);
@@ -61,16 +53,30 @@ namespace TTV
             // Get chapters' content if needed
             Console.WriteLine("Get chapters' content!");
             var complete = GetChapterListContent(story, fileName, storyController);
+            PrintElapsedTime(stopwatch);
             // Save output if completed
             if (complete)
             {
-                Console.WriteLine("Save output!");
+                Console.WriteLine("Saving output!");
                 SaveHtml(story, fileName);
                 Console.WriteLine("Completed!");
             }
+            PrintElapsedTime(stopwatch);
             // Save current work for future
             Console.WriteLine("Saved Current Work!");
             SaveCurrentWork(story, fileName);
+            PrintElapsedTime(stopwatch, false);
+        }
+
+        private static void PrintElapsedTime(Stopwatch stopwatch, bool reset = true)
+        {
+            stopwatch.Stop();
+            Console.WriteLine($"Download time {stopwatch.ElapsedMilliseconds / 1000}s");
+            if (reset)
+            {
+                stopwatch.Reset();
+                stopwatch.Start();
+            }
         }
 
         public static StoryModel ReadPreviousWork(string fileName){
@@ -207,16 +213,15 @@ namespace TTV
         {
             var chapterCount = 0;
             if (storyController.HasToken){
-                foreach (var chapter in story.Chapters) {
+                foreach (var (chapter, index) in story.Chapters.Select((chapter, index) => (chapter, index))) {
                     if (string.IsNullOrEmpty(chapter.Content))
                     {
-                        Console.WriteLine(chapter.ChapterNumber);
+                        Console.WriteLine($"Chapter {index + 1}/{story.Chapters.Count}");
                         var content = storyController.GetChapterContent(chapter.Id);
                         if (!string.IsNullOrEmpty(content)){
                             chapter.Content = content;
                             chapterCount++;
                             SaveCurrentWork(story, fileName);
-                            Thread.Sleep(100);
                             continue;
                         }
                     }
