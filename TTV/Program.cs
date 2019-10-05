@@ -18,6 +18,8 @@ namespace TTV
             var token = args[1];
             int.TryParse(args[2], out var storyId);
             var fileName = args[3];
+            int.TryParse(args[4], out var startChapter);
+            int.TryParse(args[5], out var endChapter);
 
             var storyController = new StoryController(userId, token, storyId);
             StoryModel story;
@@ -50,15 +52,22 @@ namespace TTV
             }
 
             SaveCurrentWork(story, fileName);
+
+            // Format chapter list
+            startChapter = startChapter < 0 ? 0 : startChapter;
+            endChapter = endChapter < startChapter || endChapter >= story.Chapters.Count ? story.Chapters.Count : endChapter;
+            var totalChapterToDownload = endChapter - startChapter + 1;
+
             // Get chapters' content if needed
             Console.WriteLine("Get chapters' content!");
-            var complete = GetChapterListContent(story, fileName, storyController);
+
+            var complete = GetChapterListContent(story, fileName, storyController, startChapter, endChapter, totalChapterToDownload);
             PrintElapsedTime(stopwatch);
             // Save output if completed
             if (complete)
             {
                 Console.WriteLine("Saving output!");
-                SaveHtml(story, fileName);
+                SaveHtml(story, fileName, startChapter, endChapter, totalChapterToDownload);
                 Console.WriteLine("Completed!");
             }
             PrintElapsedTime(stopwatch);
@@ -66,12 +75,13 @@ namespace TTV
             Console.WriteLine("Saved Current Work!");
             SaveCurrentWork(story, fileName);
             PrintElapsedTime(stopwatch, false);
+            Console.Read();
         }
 
         private static void PrintElapsedTime(Stopwatch stopwatch, bool reset = true)
         {
             stopwatch.Stop();
-            Console.WriteLine($"Download time {stopwatch.ElapsedMilliseconds / 1000}s");
+            Console.WriteLine($"Running time {stopwatch.ElapsedMilliseconds / 1000}s");
             if (reset)
             {
                 stopwatch.Reset();
@@ -209,14 +219,16 @@ namespace TTV
             }
         }
 
-        public static bool GetChapterListContent(StoryModel story, string fileName, StoryController storyController)
+        public static bool GetChapterListContent(StoryModel story, string fileName, StoryController storyController, int startChapter, int endChapter, int totalChapterToDownload)
         {
             var chapterCount = 0;
             if (storyController.HasToken){
-                foreach (var (chapter, index) in story.Chapters.Select((chapter, index) => (chapter, index))) {
+                foreach (var (chapter, index) in story.Chapters.Where(x => string.IsNullOrEmpty(x.Content)).Select((chapter, index) => (chapter, index))) {
+                    if (index < startChapter) continue;
+                    if (index > endChapter) break;
                     if (string.IsNullOrEmpty(chapter.Content))
                     {
-                        Console.WriteLine($"Chapter {index + 1}/{story.Chapters.Count}");
+                        Console.WriteLine($"Chapter {index - startChapter + 1}/{totalChapterToDownload}");
                         var content = storyController.GetChapterContent(chapter.Id);
                         if (!string.IsNullOrEmpty(content)){
                             chapter.Content = content;
@@ -227,7 +239,7 @@ namespace TTV
                     }
                     chapterCount++;
                 }
-                return chapterCount == story.Chapters.Count;
+                return chapterCount == totalChapterToDownload;
             }
             else
             {
@@ -236,64 +248,73 @@ namespace TTV
             }
         }
 
-        public static void SaveHtml(StoryModel story, string fileName)
+        public static void SaveHtml(StoryModel story, string fileName, int startChapter, int endChapter, int totalChapterToDownload)
         {
             // Output data
             var outputFile = fileName + ".html";
-            var output = "<html>";
+            StringBuilder sb = new StringBuilder();            
+            sb.Append("<html>");
             // header
-            output += @"<head>" + 
+            sb.Append(@"<head>" +
                 "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />" +
-                "<title></title>" + 
-                "<style>" + 
-                "    *{margin:0!important;line-height:1.3em}" + 
-                "    body{margin:8px!important;}" + 
-                "    a{font-weight:700;text-decoration:none}" + 
+                "<title></title>" +
+                "<style>" +
+                "    *{margin:0!important;line-height:1.3em}" +
+                "    body{margin:8px!important;}" +
+                "    a{font-weight:700;text-decoration:none}" +
                 "    h2{color:red;font-weight:700;text-align:center;}" +
                 "    .center{text-align:center;}" +
-                "    .info{font-weight:700;}" + 
-                "    .red{color:red;}" + 
-                "    .purple{color:purple;}" + 
+                "    .info{font-weight:700;}" +
+                "    .red{color:red;}" +
+                "    .purple{color:purple;}" +
                 "    .introduce{font-weight:100}" +
-                "    .blue{color:blue}" + 
-                "    .green{color:green}" + 
-                "    </style>" + 
-                "</head>";
-            output += "<body>";
-            output += "<h2 class=\"blue center\">Truyện: " + story.Name + "</h2>";
-            output += "<p class=\"info center\">Thông tin ebook</p>";
-            output += "<p class=\"red center\">Người tạo: Bestfriend</p>";
-            output += "<p class=\"purple center\">Nguồn: Tàng thư viện</p>";
-            output += "<p class=\"blue center\">Tác giả: " + story.Author.Name + "</p>";
-            output += "<p class=\"green center\">Trạng thái: " + (story.Finish == 0 ? "Đang ra" : "Hoàn thành") + "</p>";
-            output += "<p class=\"info center\">Giới thiệu<p><p class=\"introduce center\">" + story.Introduce.Replace("\n", "<br />") + "</p>";
-            output += "<p class=\"info center\">Danh sách chương</p>";
+                "    .blue{color:blue}" +
+                "    .green{color:green}" +
+                "    </style>" +
+                "</head>");
+            sb.Append("<body>");
+            sb.Append($"<h2 class=\"blue center\">Truyện: {story.Name}</h2>");
+            sb.Append("<p class=\"info center\">Thông tin ebook</p>");
+            sb.Append("<p class=\"red center\">Người tạo: Bestfriend</p>");
+            sb.Append("<p class=\"purple center\">Nguồn: Tàng thư viện</p>");
+            sb.Append($"<p class=\"blue center\">Tác giả: {story.Author.Name }</p>");
+            sb.Append($"<p class=\"green center\">Trạng thái: {(story.Finish == 0 ? "Đang ra" : "Hoàn thành")}</p>");
+            sb.Append($"<p class=\"info center\">Giới thiệu<p><p class=\"introduce center\">{story.Introduce.Replace("\n", "<br />")}</p>");
+            sb.Append("<p class=\"info center\">Danh sách chương</p>");
             var step = 100;
-            for (var index = 1; index <= story.Chapters.Count; index = index + step) {
+            for (var index = startChapter; index <= endChapter; index = index + step)
+            {
                 var chapter = story.Chapters[index - 1];
-                if (chapter != null) {
+                if (chapter != null)
+                {
                     var nextIndex = index + step;
-                    if (nextIndex > story.Chapters.Count) nextIndex = story.Chapters.Count;
+                    if (nextIndex > endChapter) nextIndex = endChapter;
                     var nextChapter = story.Chapters[nextIndex - 1];
-                    if (nextChapter != null) {
-                        output += "<p><a href=\"#" + index + "\">" + chapter.ChapterNumber + " - " + nextChapter.ChapterNumber + "</a></p>";
+                    if (nextChapter != null)
+                    {
+                        sb.Append($"<p><a href=\"#{index}\">{chapter.ChapterNumber} - {nextChapter.ChapterNumber}</a></p>");
                     }
                 }
             }
-            for (var index = 1; index <= story.Chapters.Count; index++) {
+            for (var index = startChapter; index <= endChapter; index++)
+            {
                 var chapter = story.Chapters[index - 1];
-                if (chapter != null) {
-                    output += "<p id=\"" + index + "\"><a href=\"#" + chapter.Id + "\">" + chapter.ChapterNumber + ": " + chapter.ChapterName + "</a></p>";
+                if (chapter != null)
+                {
+                    sb.Append($"<p id=\"{index}\"><a href=\"#{chapter.Id}\">{chapter.ChapterNumber}: {chapter.ChapterName}</a></p>");
                 }
             }
-            foreach (var chapter in story.Chapters){
-                output += "<br /><br /><h2 id=\"" + chapter.Id + "\">" + story.Name + " - " + chapter.ChapterNumber + ": " + chapter.ChapterName + "</h2><br /><br />";
-                if (chapter.Content != null) {
-                    output += "<p>" + chapter.Content.Replace("\n", "<br />") + "</p>";
+            foreach (var chapter in story.Chapters.Where(x => !string.IsNullOrEmpty(x.Content)))
+            {
+                sb.Append($"<br /><br /><h2 id=\"{chapter.Id}\">{story.Name} - {chapter.ChapterNumber}: {chapter.ChapterName }</h2><br /><br />");
+                if (chapter.Content != null)
+                {
+                    sb.Append($"<p>{chapter.Content.Replace("\n", "<br />") }</p>");
                 }
             }
-            output += "</body>";
-            output += "</html>";
+            sb.Append("</body>");
+            sb.Append("</html>");
+            var output = sb.ToString();
             File.WriteAllLines(outputFile, output.Split('\n'));
         }
 
