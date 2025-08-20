@@ -1,0 +1,39 @@
+{
+    "models": [
+        {
+            "id": "gemini-2.0-flash-lite",
+            "apiId": "gemini-2.0-flash-lite",
+            "name": "Gemini 2.0 Flash Lite",
+            "description": "Phiên bản gọn nhẹ, tối ưu cho tốc độ và chi phí cực thấp. Phù hợp cho việc dịch nhanh các đoạn văn bản ngắn, không quá phức tạp.",
+            "price": "Giá tham khảo: $0.075/1M token (input), $0.30/1M token (output)"
+        },
+        {
+            "id": "gemini-2.0-flash",
+            "apiId": "gemini-2.0-flash", 
+            "name": "Gemini 2.0 Flash",
+            "description": "Mô hình nhanh và hiệu quả về chi phí. Là lựa chọn cân bằng, lý tưởng cho các tác vụ dịch thuật hàng ngày với chất lượng tốt.",
+            "price": "Giá tham khảo: $0.10/1M token (input), $0.40/1M token (output)"
+        },
+        {
+            "id": "gemini-2.5-flash-lite",
+            "apiId": "gemini-2.5-flash-lite",
+            "name": "Gemini 2.5 Flash Lite", 
+            "description": "Thế hệ mới, gọn nhẹ và thông minh hơn. Cung cấp tốc độ vượt trội cùng khả năng hiểu ngữ cảnh tốt hơn so với phiên bản 2.0.",
+            "price": "Giá tham khảo: $0.10/1M token (input), $0.40/1M token (output)"
+        },
+        {
+            "id": "gemini-2.5-flash",
+            "apiId": "gemini-2.5-flash",
+            "name": "Gemini 2.5 Flash",
+            "description": "Mô hình đa năng thế hệ mới, kết hợp tốc độ cao và khả năng suy luận mạnh mẽ. Lựa chọn mặc định được đề xuất cho hầu hết các nhu cầu.",
+            "price": "Giá tham khảo: $0.30/1M token (input), $2.50/1M token (output)"
+        },
+        {
+            "id": "gemini-2.5-pro",
+            "apiId": "gemini-2.5-pro",
+            "name": "Gemini 2.5 Pro (Chất lượng cao)",
+            "description": "Chất lượng dịch vượt trội, xử lý ngữ cảnh phức tạp và tinh tế. Dành cho người dùng yêu cầu chất lượng cao nhất.",
+            "price": "Giá tham khảo: Từ $1.25/1M token (input), $10.00/1M token (output)"
+        }
+    ]
+}
