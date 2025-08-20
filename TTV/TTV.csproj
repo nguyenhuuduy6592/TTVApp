@@ -10,4 +10,16 @@
     <PackageReference Include="System.Text.Encodings.Web" Version="4.4.0" />
     <PackageReference Include="System.Text.Json" Version="6.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Config\config.sample.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\models.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\README.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

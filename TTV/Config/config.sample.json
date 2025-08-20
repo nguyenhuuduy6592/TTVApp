@@ -1,0 +1,12 @@
+{
+    "userId": "123456",
+    "token": "your-ttv-token",
+    "storyId": "story-id",
+    "outputFileName": "output.html",
+    "startChapter": 1,
+    "endChapter": 10,
+    "gemini": {
+        "apiKey": "your-google-ai-api-key",
+        "modelId": "gemini-2.0-flash"
+    }
+}
