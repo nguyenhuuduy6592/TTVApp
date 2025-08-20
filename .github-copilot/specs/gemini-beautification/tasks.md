@@ -38,8 +38,8 @@
   - Add skip logic for missing API key
   - _Requirements: 2.5, 4.1_
 
-- [ ] 3. Error Handling
-- [ ] 3.1 Implement Error Messages
+- [x] 3. Error Handling
+- [x] 3.1 Implement Error Messages
   - Add Vietnamese error messages
   - Add retry instructions
   - Add network troubleshooting

@@ -2,12 +2,12 @@
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net;
 using System.Text;
 using System;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using System.Linq;
+using TTV.Error;
 using TTV.Config;
 using TTV.Services;
 
@@ -214,13 +214,18 @@ namespace TTV
                                     chapter.IsEnhancedWithAI = true;
                                     enhancementSuccessful = true;
                                 }
-                                catch (Exception)
+                                catch (EnhancementException ex)
                                 {
                                     retryCount++;
                                     if (retryCount == maxRetries)
                                     {
                                         chapter.EnhancedContent = chapter.Content;
                                         chapter.IsEnhancedWithAI = false;
+                                        throw new EnhancementException(
+                                            ex.Type,
+                                            $"Không thể làm mượt chương {chapter.ChapterNumber} sau {maxRetries} lần thử. {ex.Message}",
+                                            $"{ex.Resolution}\n\nBạn có thể:\n1. Thử lại sau\n2. Kiểm tra cấu hình\n3. Sử dụng nội dung gốc"
+                                        );
                                     }
                                     await Task.Delay(1000 * retryCount); // Exponential backoff
                                 }

@@ -2,10 +2,10 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using TTV.Config;
+using TTV.Error;
 
 namespace TTV.Services
 {
@@ -89,17 +89,17 @@ QUY TẮC BẮT BUỘC:
             catch (HttpRequestException ex)
             {
                 if (ex.Message.Contains("401") || ex.Message.Contains("403"))
-                    throw new Exception("API Key không hợp lệ. Vui lòng kiểm tra lại trong phần Cài đặt.");
+                    throw ErrorMessages.Api.CreateInvalidApiKey();
                 if (ex.Message.Contains("429"))
-                    throw new Exception("Đã vượt quá giới hạn sử dụng API. Vui lòng thử lại sau hoặc kiểm tra gói dịch vụ của bạn.");
+                    throw ErrorMessages.Api.CreateQuotaExceeded();
                 if (ex.Message.Contains("timeout") || ex.InnerException is System.Net.Sockets.SocketException)
-                    throw new Exception("Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet và thử lại.");
+                    throw ErrorMessages.Api.CreateNetworkError();
                 
-                throw new Exception("Đã xảy ra lỗi khi xử lý với Gemini AI. Vui lòng thử lại sau.");
+                throw ErrorMessages.Enhancement.CreateEnhancementFailed();
             }
             catch (Exception)
             {
-                throw new Exception("Đã xảy ra lỗi khi xử lý với Gemini AI. Vui lòng thử lại sau.");
+                throw ErrorMessages.Enhancement.CreateEnhancementFailed();
             }
         }
 
@@ -163,17 +163,17 @@ QUY TẮC BẮT BUỘC:
             catch (HttpRequestException ex)
             {
                 if (ex.Message.Contains("401") || ex.Message.Contains("403"))
-                    throw new Exception("API Key không hợp lệ. Vui lòng kiểm tra lại trong phần Cài đặt.");
+                    throw ErrorMessages.Api.CreateInvalidApiKey();
                 if (ex.Message.Contains("429"))
-                    throw new Exception("Đã vượt quá giới hạn sử dụng API. Vui lòng thử lại sau hoặc kiểm tra gói dịch vụ của bạn.");
+                    throw ErrorMessages.Api.CreateQuotaExceeded();
                 if (ex.Message.Contains("timeout") || ex.InnerException is System.Net.Sockets.SocketException)
-                    throw new Exception("Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet và thử lại.");
+                    throw ErrorMessages.Api.CreateNetworkError();
                 
-                throw new Exception("Đã xảy ra lỗi khi xử lý với Gemini AI. Vui lòng thử lại sau.");
+                throw ErrorMessages.Enhancement.CreateEnhancementFailed();
             }
             catch (Exception)
             {
-                throw new Exception("Đã xảy ra lỗi khi xử lý với Gemini AI. Vui lòng thử lại sau.");
+                throw ErrorMessages.Enhancement.CreateEnhancementFailed();
             }
         }
 
