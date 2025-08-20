@@ -26,6 +26,12 @@
   - Update serialization
   - _Requirements: 2.1, 2.3_
 
+- [x] 2.4 Update HTML Generation
+  - Use enhanced content when available
+  - Add AI enhancement indicator (✨) in chapter header
+  - Preserve existing HTML structure
+  - _Requirements: 2.1, 2.3_
+
 - [x] 2.2 Implement Gemini Service
   - Create GeminiService class
   - Add system instruction constant

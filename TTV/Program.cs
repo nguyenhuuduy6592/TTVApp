@@ -5,12 +5,13 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace TTV
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -32,7 +33,7 @@ namespace TTV
                 if (story == null)
                 {
                     Console.WriteLine("No previous work. Read story info!");
-                    story = GetStoryInfo(storyController);
+                    story = await GetStoryInfo(storyController);
                     if (story == null)
                     {
                         Console.WriteLine($"Story with id {storyId} not found!");
@@ -42,7 +43,7 @@ namespace TTV
             }
             else
             {
-                story = GetStoryInfo(storyController);
+                story = await GetStoryInfo(storyController);
                 if (story == null)
                 {
                     Console.WriteLine($"Story with id {storyId} not found!");
@@ -61,7 +62,7 @@ namespace TTV
             // Get chapters' content if needed
             Console.WriteLine("Get chapters' content!");
 
-            var complete = GetChapterListContent(story, fileName, storyController, startChapter, endChapter, totalChapterToDownload);
+            var complete = await GetChapterListContent(story, fileName, storyController, startChapter, endChapter, totalChapterToDownload);
             PrintElapsedTime(stopwatch);
             // Save output if completed
             if (complete)
@@ -118,12 +119,12 @@ namespace TTV
             }
         }
 
-        public static StoryModel GetStoryInfo(StoryController storyController)
+        public static async Task<StoryModel> GetStoryInfo(StoryController storyController)
         {
             StoryModel model = null;
             if (storyController.HasToken)
             {
-                var data = storyController.GetStoryContent();
+                var data = await storyController.GetStoryContent();
                 if (data != null)
                 {
                     Encoding enc = new UTF8Encoding(true, true);
@@ -144,7 +145,7 @@ namespace TTV
                     bytes = enc.GetBytes(data.Story.Introduce);
                     model.Introduce = enc.GetString(bytes);
 
-                    var chapterList = storyController.GetChapterList();
+                    var chapterList = await storyController.GetChapterList();
                     if (chapterList != null)
                     {
                         foreach (var item in chapterList.Chapter)
@@ -219,7 +220,7 @@ namespace TTV
             }
         }
 
-        public static bool GetChapterListContent(StoryModel story, string fileName, StoryController storyController, int startChapter, int endChapter, int totalChapterToDownload)
+        public static async Task<bool> GetChapterListContent(StoryModel story, string fileName, StoryController storyController, int startChapter, int endChapter, int totalChapterToDownload)
         {
             var chapterCount = 0;
             if (storyController.HasToken){
@@ -229,9 +230,11 @@ namespace TTV
                     if (string.IsNullOrEmpty(chapter.Content))
                     {
                         Console.WriteLine($"Chapter {index - startChapter + 1}/{totalChapterToDownload}");
-                        var content = storyController.GetChapterContent(chapter.Id);
-                        if (!string.IsNullOrEmpty(content)){
-                            chapter.Content = content;
+                        var result = await storyController.GetChapterContent(chapter.Id);
+                        if (result != null && !string.IsNullOrEmpty(result.Content)){
+                            chapter.Content = result.Content;
+                            chapter.EnhancedContent = result.EnhancedContent;
+                            chapter.IsEnhancedWithAI = result.IsEnhancedWithAI;
                             chapterCount++;
                             SaveCurrentWork(story, fileName);
                             continue;
@@ -270,6 +273,7 @@ namespace TTV
                 "    .introduce{font-weight:100}" +
                 "    .blue{color:blue}" +
                 "    .green{color:green}" +
+                "    h2 .ai-enhanced { color: #FFD700; }" +
                 "    </style>" +
                 "</head>");
             sb.Append("<body>");
@@ -301,15 +305,23 @@ namespace TTV
                 var chapter = story.Chapters[index - 1];
                 if (chapter != null)
                 {
-                    sb.Append($"<p id=\"{index}\"><a href=\"#{chapter.Id}\">{chapter.ChapterNumber}: {chapter.ChapterName}</a></p>");
+                    var chapterTitle = chapter.IsEnhancedWithAI 
+                        ? $"{chapter.ChapterNumber}: {chapter.ChapterName} ✨"
+                        : $"{chapter.ChapterNumber}: {chapter.ChapterName}";
+                    sb.Append($"<p id=\"{index}\"><a href=\"#{chapter.Id}\">{chapterTitle}</a></p>");
                 }
             }
             foreach (var chapter in story.Chapters.Where(x => !string.IsNullOrEmpty(x.Content)))
             {
-                sb.Append($"<br /><br /><h2 id=\"{chapter.Id}\">{story.Name} - {chapter.ChapterNumber}: {chapter.ChapterName }</h2><br /><br />");
-                if (chapter.Content != null)
+                var chapterTitle = chapter.IsEnhancedWithAI 
+                    ? $"{story.Name} - {chapter.ChapterNumber}: {chapter.ChapterName} ✨"
+                    : $"{story.Name} - {chapter.ChapterNumber}: {chapter.ChapterName}";
+                sb.Append($"<br /><br /><h2 id=\"{chapter.Id}\">{chapterTitle}</h2><br /><br />");
+                
+                var content = chapter.IsEnhancedWithAI ? chapter.EnhancedContent : chapter.Content;
+                if (content != null)
                 {
-                    sb.Append($"<p>{chapter.Content.Replace("\n", "<br />") }</p>");
+                    sb.Append($"<p>{content.Replace("\n", "<br />")}</p>");
                 }
             }
             sb.Append("</body>");

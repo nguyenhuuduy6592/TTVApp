@@ -73,7 +73,7 @@ namespace TTV
             }
         }
 
-        public StoryResponse GetStoryContent()
+        public async Task<StoryResponse> GetStoryContent()
         {
             StoryResponse data = null;
             try
@@ -100,11 +100,11 @@ namespace TTV
                 encodeQuery.Headers.TryAddWithoutValidation("userid", UserId.ToString());
                 encodeQuery.Headers.TryAddWithoutValidation("versionios", "230");
 
-                var httpResponse = client.PostAsync(new Uri(TTVBaseUrl + "get_list_story_author"), encodeQuery).Result;
+                var httpResponse = await client.PostAsync(new Uri(TTVBaseUrl + "get_list_story_author"), encodeQuery);
 
                 if (httpResponse.Content != null)
                 {
-                    var responseContent = httpResponse.Content.ReadAsStringAsync().Result;
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
                     data = JsonConvert.DeserializeObject<StoryResponse>(responseContent);
                 }
             }
@@ -114,11 +114,11 @@ namespace TTV
             return data;
         }
 
-        public ChapterListResponse GetChapterList()
+        public async Task<ChapterListResponse> GetChapterList()
         {
-                                ChapterListResponse chapterList = null;
-                    int retryCount = 0;
-                    const int maxRetries = 3;
+            ChapterListResponse chapterList = null;
+            int retryCount = 0;
+            const int maxRetries = 3;
             try
             {
                 var client = new HttpClient
@@ -144,11 +144,11 @@ namespace TTV
                 encodeQuery.Headers.TryAddWithoutValidation("userid", UserId.ToString());
                 encodeQuery.Headers.TryAddWithoutValidation("versionios", "230");
 
-                var httpResponse = client.PostAsync(new Uri(TTVBaseUrl + "get_list_chapter"), encodeQuery).Result;
+                var httpResponse = await client.PostAsync(new Uri(TTVBaseUrl + "get_list_chapter"), encodeQuery);
 
                 if (httpResponse.Content != null)
                 {
-                    var responseContent = httpResponse.Content.ReadAsStringAsync().Result;
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
                     chapterList = JsonConvert.DeserializeObject<ChapterListResponse>(responseContent);
                 }
             }
