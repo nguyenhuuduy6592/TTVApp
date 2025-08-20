@@ -1,15 +1,14 @@
-
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
 using System.Linq;
 using TTV.Error;
 using TTV.Config;
 using TTV.Services;
+using System.Text.Json;
 
 namespace TTV
 {
@@ -19,6 +18,7 @@ namespace TTV
         private const string TTVBaseUrl = BaseUrl + "ttv/ttv/public/";
         private const string IMEI = "CCA4E8EB-E71D-41C5-BACF-4D60488903C0";
         private const string UserAgent = "TTV/2.3 (iPhone; iOS 13.1; Scale/2.00)";
+        private const int maxRetries = 3;
         private int UserId { get; set; }
         private string Token { get; set; }
         private int StoryId { get; set; }
@@ -57,7 +57,7 @@ namespace TTV
             client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 
             var querydata = "get_token={\"imei\":\"" + IMEI + "\",\"token_adr\":\"null\",\"token_ios\":\"null\"}";
-            var encodeQuery = new StringContent(Uri.EscapeUriString(querydata), Encoding.UTF8, "application/json");
+            var encodeQuery = new StringContent(Uri.EscapeDataString(querydata), Encoding.UTF8, "application/json");
             encodeQuery.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
             var httpResponse = await client.PostAsync(new Uri(TTVBaseUrl + "get_token"), encodeQuery);
@@ -65,7 +65,7 @@ namespace TTV
             if (httpResponse.Content != null)
             {
                 var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                TokenModel data = JsonConvert.DeserializeObject<TokenModel>(responseContent);
+                TokenModel data = JsonSerializer.Deserialize<TokenModel>(responseContent);
                 if (data != null)
                 {
                     Token = data.IMEI.remember_token;
@@ -90,7 +90,7 @@ namespace TTV
                 };
 
                 // Serialize our concrete class into a JSON String
-                var querydata = JsonConvert.SerializeObject(postModel);
+                var querydata = JsonSerializer.Serialize(postModel);
                 var encodeQuery = new StringContent(querydata, Encoding.UTF8, "application/json");
 
                 encodeQuery.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -105,11 +105,21 @@ namespace TTV
                 if (httpResponse.Content != null)
                 {
                     var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    data = JsonConvert.DeserializeObject<StoryResponse>(responseContent);
+                    data = JsonSerializer.Deserialize<StoryResponse>(responseContent);
                 }
             }
             catch (Exception ex)
             {
+                int retryCount = 0;
+                retryCount++;
+                if (retryCount < maxRetries)
+                {
+                    // Retry logic
+                    await Task.Delay(1000 * retryCount); // Exponential backoff
+                    return await GetStoryContent(); // Retry the method
+                }
+
+                Console.WriteLine($"Error fetching story content: {ex.Message}");
             }
             return data;
         }
@@ -118,7 +128,6 @@ namespace TTV
         {
             ChapterListResponse chapterList = null;
             int retryCount = 0;
-            const int maxRetries = 3;
             try
             {
                 var client = new HttpClient
@@ -134,7 +143,7 @@ namespace TTV
                 };
 
                 // Serialize our concrete class into a JSON String
-                var querydata = JsonConvert.SerializeObject(postModel);
+                var querydata = JsonSerializer.Serialize(postModel);
                 var encodeQuery = new StringContent(querydata, Encoding.UTF8, "application/json");
 
                 encodeQuery.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -149,11 +158,20 @@ namespace TTV
                 if (httpResponse.Content != null)
                 {
                     var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    chapterList = JsonConvert.DeserializeObject<ChapterListResponse>(responseContent);
+                    chapterList = JsonSerializer.Deserialize<ChapterListResponse>(responseContent);
                 }
             }
             catch (Exception ex)
             {
+                retryCount++;
+                if (retryCount < maxRetries)
+                {
+                    // Retry logic
+                    await Task.Delay(1000 * retryCount); // Exponential backoff
+                    return await GetChapterList(); // Retry the method
+                }
+
+                Console.WriteLine($"Error fetching chapter list: {ex.Message}");
             }
             return chapterList;
         }
@@ -179,7 +197,7 @@ namespace TTV
                 };
 
                 // Serialize our concrete class into a JSON String
-                var querydata = JsonConvert.SerializeObject(postModel);
+                var querydata = JsonSerializer.Serialize(postModel);
                 var encodeQuery = new StringContent(querydata, Encoding.UTF8, "application/json");
 
                 encodeQuery.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -194,7 +212,7 @@ namespace TTV
                 if (httpResponse.Content != null)
                 {
                     var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    var data = JsonConvert.DeserializeObject<ChapterResponse>(responseContent);
+                    var data = JsonSerializer.Deserialize<ChapterResponse>(responseContent);
                     if (data.Message == "succes")
                     {
                         chapter.Content = data.Content_Chapter[0].Content;

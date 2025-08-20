@@ -1,10 +1,10 @@
 ﻿using System;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json;
-using System.Text.RegularExpressions;
-using System.Linq;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace TTV
@@ -94,11 +94,8 @@ namespace TTV
             StoryModel story = null;
             var filePath = fileName + ".bin";
             if (File.Exists(filePath)){
-                using (StreamReader file = File.OpenText(filePath))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    story = (StoryModel)serializer.Deserialize(file, typeof(StoryModel));
-                }
+                using StreamReader file = File.OpenText(filePath);
+                story = JsonSerializer.Deserialize<StoryModel>(file.ReadToEnd());
             }
             return story;
         }
@@ -107,11 +104,9 @@ namespace TTV
         {
             try {
                 var filePath = fileName + ".bin";
-                using (StreamWriter file = File.CreateText(filePath))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Serialize(file, story);
-                }
+                using StreamWriter file = File.CreateText(filePath);
+                string jsonString = JsonSerializer.Serialize<StoryModel>(story);
+                file.Write(jsonString);
                 return true;
             }
             catch {
@@ -177,7 +172,6 @@ namespace TTV
                 var index = 0;
                 // read data
                 Encoding enc = new UTF8Encoding(true, true);
-                JsonSerializer serializer = new JsonSerializer();
                 byte[] bytes;
                 var story = new StoryModel();
                 var matches = regex.Matches(content);
@@ -186,7 +180,7 @@ namespace TTV
                     var value = match.Value;
                     if (index == 1)
                     {
-                        StoryResponse data = JsonConvert.DeserializeObject<StoryResponse>(value);
+                        StoryResponse data = JsonSerializer.Deserialize<StoryResponse>(value);
                         story.Id = data.Story.Id;
                         story.Image = data.Story.Image;
                         story.Finish = data.Story.Finish;
@@ -202,7 +196,7 @@ namespace TTV
                     }
                     else if (index == 3)
                     {
-                        ChapterListResponse data = JsonConvert.DeserializeObject<ChapterListResponse>(value);
+                        ChapterListResponse data = JsonSerializer.Deserialize<ChapterListResponse>(value);
                         foreach (var item in data.Chapter)
                         {
                             story.Chapters.Add(new ChapterModel
@@ -339,7 +333,6 @@ namespace TTV
                 var index = 0;
                 // read data
                 Encoding enc = new UTF8Encoding(true, true);
-                JsonSerializer serializer = new JsonSerializer();
                 byte[] bytes;
                 var story = new StoryModel();
                 var chapterId = 0;
@@ -348,7 +341,7 @@ namespace TTV
                 {
                     var value = match.Value;
                     if (index == 1) {
-                        StoryResponse data = JsonConvert.DeserializeObject<StoryResponse>(value);
+                        StoryResponse data = JsonSerializer.Deserialize<StoryResponse>(value);
                         story.Id = data.Story.Id;
                         story.Image = data.Story.Image;
                         story.Finish = data.Story.Finish;
@@ -362,7 +355,7 @@ namespace TTV
                         story.Introduce = enc.GetString(bytes);
                     }
                     else if (index == 3) {
-                        ChapterListResponse data = JsonConvert.DeserializeObject<ChapterListResponse>(value);
+                        ChapterListResponse data = JsonSerializer.Deserialize<ChapterListResponse>(value);
                         foreach (var item in data.Chapter){
                             story.Chapters.Add(new ChapterModel {
                                 ChapterName = item.Content_Title_Of_Chapter,
@@ -374,7 +367,7 @@ namespace TTV
                     }
                     else if (index >= 4 && index % 2 == 0) {
                         value = value.Replace("\\\"", "abc123");
-                        ChapterRequest data = JsonConvert.DeserializeObject<ChapterRequest>(value);
+                        ChapterRequest data = JsonSerializer.Deserialize<ChapterRequest>(value);
                         Regex regex2 = new Regex(@"id_chapterabc123:abc123(\d+)abc123,abc123id_storyabc123:abc123(\d+)");
                         var match2 = regex2.Match(data.Get_Content_Chapter);
                         if (match2.Groups.Count == 3) { 
@@ -383,7 +376,7 @@ namespace TTV
                         }
                     }
                     else if (index >= 5 && index % 2 == 1 && chapterId > 0 && storyId > 0) {
-                        ChapterResponse data = JsonConvert.DeserializeObject<ChapterResponse>(value);
+                        ChapterResponse data = JsonSerializer.Deserialize<ChapterResponse>(value);
                         var chapter = story.Chapters.FirstOrDefault(x => x.Id == chapterId && x.StoryId == storyId);
                         if (chapter != null) {
                             chapter.Content = data.Content_Chapter[0].Content;

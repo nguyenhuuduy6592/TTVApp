@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using Newtonsoft.Json;
 using TTV.Config;
 using TTV.Error;
+using System.Text.Json;
 
 namespace TTV.Services
 {
@@ -77,12 +77,12 @@ QUY TẮC BẮT BUỘC:
 
                 var response = await _httpClient.PostAsync(
                     $"{_modelId}:generateContent?key={_apiKey}",
-                    new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json")
+                    new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
                 );
 
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<GeminiResponse>(responseContent);
+                var result = JsonSerializer.Deserialize<GeminiResponse>(responseContent);
 
                 return result?.Candidates?[0]?.Content?.Parts?[0]?.Text ?? content;
             }
@@ -136,7 +136,7 @@ QUY TẮC BẮT BUỘC:
 
                 var response = await _httpClient.PostAsync(
                     $"{_modelId}:streamGenerateContent?key={_apiKey}",
-                    new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json")
+                    new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
                 );
 
                 response.EnsureSuccessStatusCode();
@@ -149,7 +149,7 @@ QUY TẮC BẮT BUỘC:
                 {
                     if (string.IsNullOrEmpty(line)) continue;
 
-                    var chunk = JsonConvert.DeserializeObject<GeminiStreamResponse>(line);
+                    var chunk = JsonSerializer.Deserialize<GeminiStreamResponse>(line);
                     if (chunk?.Candidates?[0]?.Content?.Parts?[0]?.Text is string text)
                     {
                         buffer.Append(text);
