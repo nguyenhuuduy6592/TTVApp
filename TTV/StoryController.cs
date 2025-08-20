@@ -8,6 +8,8 @@ using System;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using System.Linq;
+using TTV.Config;
+using TTV.Services;
 
 namespace TTV
 {
@@ -21,13 +23,15 @@ namespace TTV
         private string Token { get; set; }
         private int StoryId { get; set; }
         public bool HasToken { get; set; }
+        private readonly IGeminiService _geminiService;
 
-        public StoryController(int userId, string token, int storyId)
+        public StoryController(int userId, string token, int storyId, GeminiConfig geminiConfig = null)
         {
             UserId = userId;
             Token = token;
             StoryId = storyId;
             HasToken = true;
+            _geminiService = new GeminiService(geminiConfig);
         }
 
         public StoryController(int storyId)
@@ -112,7 +116,9 @@ namespace TTV
 
         public ChapterListResponse GetChapterList()
         {
-            ChapterListResponse chapterList = null;
+                                ChapterListResponse chapterList = null;
+                    int retryCount = 0;
+                    const int maxRetries = 3;
             try
             {
                 var client = new HttpClient
@@ -152,9 +158,9 @@ namespace TTV
             return chapterList;
         }
 
-        public string GetChapterContent(int chapterId)
+        public async Task<ChapterModel> GetChapterContent(int chapterId)
         {
-            ChapterModel chapter = new ChapterModel
+            var chapter = new ChapterModel
             {
                 Id = chapterId
             };
@@ -183,18 +189,48 @@ namespace TTV
                 encodeQuery.Headers.TryAddWithoutValidation("userid", UserId.ToString());
                 encodeQuery.Headers.TryAddWithoutValidation("versionios", "230");
 
-                var httpResponse = client.PostAsync(new Uri(TTVBaseUrl + "get_content_chapter"), encodeQuery).Result;
+                var httpResponse = await client.PostAsync(new Uri(TTVBaseUrl + "get_content_chapter"), encodeQuery);
 
                 if (httpResponse.Content != null)
                 {
-                    var responseContent = httpResponse.Content.ReadAsStringAsync().Result;
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
                     var data = JsonConvert.DeserializeObject<ChapterResponse>(responseContent);
                     if (data.Message == "succes")
+                    {
                         chapter.Content = data.Content_Chapter[0].Content;
+                        
+                        // Only enhance if Gemini service is configured
+                        if (_geminiService?.IsConfigured == true)
+                        {
+                            int retryCount = 0;
+                            const int maxRetries = 3;
+                            bool enhancementSuccessful = false;
+
+                            while (retryCount < maxRetries && !enhancementSuccessful)
+                            {
+                                try
+                                {
+                                    chapter.EnhancedContent = await _geminiService.EnhanceContentAsync(chapter.Content);
+                                    chapter.IsEnhancedWithAI = true;
+                                    enhancementSuccessful = true;
+                                }
+                                catch (Exception)
+                                {
+                                    retryCount++;
+                                    if (retryCount == maxRetries)
+                                    {
+                                        chapter.EnhancedContent = chapter.Content;
+                                        chapter.IsEnhancedWithAI = false;
+                                    }
+                                    await Task.Delay(1000 * retryCount); // Exponential backoff
+                                }
+                            }
+                        }
+                    }
                 }
-                return chapter.Content;
+                return chapter;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

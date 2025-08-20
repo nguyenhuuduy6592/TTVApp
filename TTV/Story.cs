@@ -54,6 +54,10 @@ namespace TTV
         public string ChapterName { get; set; }
         public int VolumeNumber { get; set; }
         public string Content { get; set; }
+        public string EnhancedContent { get; set; }
+        public bool IsEnhancedWithAI { get; set; }
+
+        public string GetDisplayContent() => IsEnhancedWithAI ? EnhancedContent : Content;
     }
     public class AuthorModel {
         public string Name { get; set; }

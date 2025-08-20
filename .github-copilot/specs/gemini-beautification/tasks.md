@@ -19,20 +19,20 @@
   - Document retry procedures
   - _Requirements: 3.3, 3.4_
 
-- [ ] 2. Content Enhancement
-- [ ] 2.1 Extend Chapter Model
+- [x] 2. Content Enhancement
+- [x] 2.1 Extend Chapter Model
   - Add EnhancedContent property
   - Add IsEnhancedWithAI flag
   - Update serialization
   - _Requirements: 2.1, 2.3_
 
-- [ ] 2.2 Implement Gemini Service
+- [x] 2.2 Implement Gemini Service
   - Create GeminiService class
   - Add system instruction constant
   - Add streaming support
   - _Requirements: 2.2, 2.4_
 
-- [ ] 2.3 Update Story Controller
+- [x] 2.3 Update Story Controller
   - Add enhancement check logic
   - Implement retry mechanism
   - Add skip logic for missing API key
